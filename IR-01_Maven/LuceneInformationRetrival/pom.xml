@@ -16,9 +16,38 @@
           <target>1.8</target>
         </configuration>        
       </plugin>
+      <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <phase>install</phase>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+       <plugin>
+      <!-- Build an executable JAR -->
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-jar-plugin</artifactId>
+      <version>3.0.2</version>
+      <configuration>
+        <archive>
+          <manifest>
+            <addClasspath>true</addClasspath>
+            <classpathPrefix>lib/</classpathPrefix>
+            <mainClass>org.lir.main.SearchMain</mainClass>
+          </manifest>
+        </archive>
+      </configuration>
+    </plugin>
     </plugins>
   </build>
-            <dependencies>
+  <dependencies>
     <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
     <dependency>
     <groupId>org.apache.lucene</groupId>

@@ -52,127 +52,121 @@ java -jar IR P01.jar [path to document folder] [path to index folder] [VS/OK] [q
 /*
  * 
  * 
- * Team Members:
+ * Team Members: 
+ * SUBASH PRAKASH
+ * NIKHIL
+ * ANSTUP
  * 
- * Team Name:
+ * Description: Perform a simple indexing and searching strategy using apache Lucene
  * 
- * Description:
- * 
- * TODO
  */
 public class SearchMain {
-	
-	
-	
+
 	private static void usage() {
-		System.out.println("The program should be executed as:"
-				+ "java -jar IR P01.jar"
-				+ " [path to document folder] [path to index folder] [VS/OK] [query]");		
+		System.out.println("The program should be executed as:" + "java -jar LuceneInformationRetrival-P01.jar"
+				+ " [path to document folder] [path to index folder] [VS/OK] [query]");
 	}
-	
-	  static void intializationAndIndex(boolean create,String indexPath,Path docDir) {
-		    Date start = new Date();
-		    try {
-		      System.out.println("Indexing to directory '" + indexPath + "'...");
 
-		      Directory dir = FSDirectory.open(Paths.get(indexPath));
-		      Analyzer analyzer = new StandardAnalyzer();
-		      IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
+	static void intializationAndIndex(boolean create, String indexPath, Path docDir) {
+		Date start = new Date();
+		try {
+			System.out.println("Indexing to directory '" + indexPath + "'...");
 
-		      if (create) {
-		        // Create a new index in the directory, removing any
-		        // previously indexed documents:
-		        iwc.setOpenMode(OpenMode.CREATE);
-		      } else {
-		        // Add new documents to an existing index:
-		        iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-		      }
+			Directory dir = FSDirectory.open(Paths.get(indexPath));
+			Analyzer analyzer = new StandardAnalyzer();
+			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 
-		      // Optional: for better indexing performance, if you
-		      // are indexing many documents, increase the RAM
-		      // buffer.  But if you do this, increase the max heap
-		      // size to the JVM (eg add -Xmx512m or -Xmx1g):
-		      //
-		      //iwc.setRAMBufferSizeMB(256.0);
+			if (create) {
+				// Create a new index in the directory, removing any
+				// previously indexed documents:
+				iwc.setOpenMode(OpenMode.CREATE);
 
-		      IndexWriter writer = new IndexWriter(dir, iwc);
-		      Indexer indexer = new Indexer();
-		      indexer.indexDocs(writer, docDir);
+			} else {
+				// Add new documents to an existing index:
+				iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+			}
 
-		      // NOTE: if you want to maximize search performance,
-		      // you can optionally call forceMerge here.  This can be
-		      // a terribly costly operation, so generally it's only
-		      // worth it when your index is relatively static (ie
-		      // you're done adding documents to it):
-		      //
-		      // writer.forceMerge(1);
+			// Optional: for better indexing performance, if you
+			// are indexing many documents, increase the RAM
+			// buffer. But if you do this, increase the max heap
+			// size to the JVM (eg add -Xmx512m or -Xmx1g):
+			//
+			// iwc.setRAMBufferSizeMB(256.0);
 
-		      writer.close();
+			IndexWriter writer = new IndexWriter(dir, iwc);
+			Indexer indexer = new Indexer();
+			indexer.indexDocs(writer, docDir);
 
-		      Date end = new Date();
-		      System.out.println(end.getTime() - start.getTime() + " total milliseconds");
+			// NOTE: if you want to maximize search performance,
+			// you can optionally call forceMerge here. This can be
+			// a terribly costly operation, so generally it's only
+			// worth it when your index is relatively static (ie
+			// you're done adding documents to it):
+			//
+			// writer.forceMerge(1);
 
-		    } catch (IOException e) {
-		      System.out.println(" caught a " + e.getClass() +
-		       "\n with message: " + e.getMessage());
-		    }
+			writer.close();
+
+			Date end = new Date();
+			System.out.println(end.getTime() - start.getTime() + " total milliseconds");
+
+		} catch (IOException e) {
+			System.out.println(" caught a " + e.getClass() + "\n with message: " + e.getMessage());
 		}
-	
-	  
-	private static String VS = "VS";
-	private static String OK = "OK";
-	//Lets take the values required as shown above as below values:
-	//arg[0] is [path to the doc folder] (this tells us that there should be a doc folder)
-	//arg[1] is [path to index folder] (this is the index folder) Need a small clarificaiton
-	//arg[2] is [VS/OK] (VS - Vector Space Model ........  OK - Okapi BM25)
-	//arg[3] is [query] (this is the query to be search and ranked for)
+	}
+
+	// Lets take the values required as shown above as below values:
+	// arg[0] is [path to the doc folder] (this tells us that there should be a doc
+	// folder)
+	// arg[1] is [path to index folder] (this is the index folder) Need a small
+	// clarificaiton
+	// arg[2] is [VS/OK] (VS - Vector Space Model ........ OK - Okapi BM25)
+	// arg[3] is [query] (this is the query to be search and ranked for)
 	public static void main(String args[]) {
-		
 
-		
-		if(args.length == 0) {
+		if (args.length == 0) {
 			usage();
-		}
-		else {
-			//Actual execution of the code
-			
+		} else if (args[0] == null || args[1] == null || args[2] == null || args[3] == null) {
+			usage();
+		} else {
+			// Actual execution of the code
+
 			String docFolder = args[0];
 			String indexFolder = args[1];
-			//String model = args[2];
-			//String query = args[3];	
-			
+			String model = args[2];
+			String query = args[3];
+
 			boolean create = true;
-			
-			//A folder check needs to added and then make the create to false if the indexFolder exists
+
+			// A folder check needs to added and then make the create to false if the
+			// indexFolder exists
 			boolean exists = new File(indexFolder).exists();
-			
-			if(exists) {
+
+			if (exists) {
 				System.out.println("Already the index directory is present, so updating...");
 				create = false;
 			}
-			
+
 			final Path docDir = Paths.get(docFolder);
-		    if (!Files.isReadable(docDir)) {
-		        System.out.println("Document directory '" +docDir.toAbsolutePath()+ "' does not exist or is not readable, please check the path");
-		        System.exit(1);
-		      }
-		    
-		  /*
-		   * Intialize the index and perform lucene indexing
-		   */
-		   intializationAndIndex(create, indexFolder, docDir);
-		  
-			
-			/*//Ideal to use Switch cases as well
-			if(model.equals(VS)) {
-				//Perform Vector Space Model Execution
+			if (!Files.isReadable(docDir)) {
+				System.out.println("Document directory '" + docDir.toAbsolutePath()
+						+ "' does not exist or is not readable, please check the path");
+				System.exit(0);
 			}
-			else if(model.equals(OK)) {
-				//Perform 
+
+			/*
+			 * Intialize the index and perform lucene indexing
+			 */
+			intializationAndIndex(create, indexFolder, docDir);
+
+			IndexSearch search = new IndexSearch(query);
+
+			try {
+				search.initSearch(indexFolder, model);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			else {
-				//Wrong model Mostly an exit
-			}*/
 		}
 	}
 }
