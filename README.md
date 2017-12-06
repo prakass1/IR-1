@@ -1,3 +1,3 @@
-# IR-1 Assignment and it's work will be here
+# Information Retrival using apache Lucene.
 
-Created a base for the project still at premature state
+The program to perform a indexing and searching using Apache Lucene. We have implemented a simple indexing and searching and build is perform using Maven which produces a jar which takes 3 input parameters HTML Folder, Index Folder, Model, Query.
