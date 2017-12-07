@@ -12,6 +12,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Explanation;
@@ -25,10 +26,11 @@ import org.apache.lucene.search.similarities.TFIDFSimilarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.lir.model.Model;
+import org.lir.util.HtmlParser;
 
 public class IndexSearch {
 
-	String field = "contents";
+	String[] field = {"title","contents"};
 	String queryString = null; // this will come from the cmd parameter
 	int repeat = 0;
 	private static String VS = "VS";
@@ -70,30 +72,27 @@ public class IndexSearch {
 				in = new BufferedReader(new InputStreamReader(System.in, StandardCharsets.UTF_8));
 			}
 
-			QueryParser parser = new QueryParser(field, analyzer);
-			String line = queryString != null ? queryString : in.readLine();
+			MultiFieldQueryParser parser = new MultiFieldQueryParser(field, analyzer);
 
-			if (line == null || line.length() == -1) {
-				System.out.println("The queryString cannot be empty" + line);
-			}
-
-			line = line.trim();
-
-			Query query = parser.parse(line);
+			Query query = parser.parse(QueryParser.escape(this.queryString));
+			
 			 int tf = searcher.count(query);
 			 System.out.println("Term Freq" + tf);
-			System.out.println("Searching for: " + query.toString(field));
+			System.out.println("Searching for: " + query);
 
 			List<Model> m = doSearch(in, searcher, query, hitsPerPage);
 
-			System.out.println("|| RANK || PATH || Score ||");
+			System.out.println("|| RANK || PATH || Score || Title");
 			for (Model model : m) {
 				// For each model obtain use the path to parse the html file and
 				// Search the title and summary (Here: Summary should relevant to the query) and
 				// print it out
 				// All implementation for parsing should go into utility package
-				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " ||");
+				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||");
 			}
+			
+			HtmlParser p = new HtmlParser();
+			p.makeHTML(m);
 
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
@@ -147,8 +146,10 @@ public class IndexSearch {
 			String path = doc.get("path");
 			if (path != null) {
 				//System.out.println((i + 1) + ". " + path);
+				System.out.println(doc.get("title"));
 				m.setRank(i + 1);
 				m.setPath(path);
+				m.setTitle(doc.get("title"));
 				//Explanation explain = searcher.explain(query, i + 1);
 				 //String desc = explain.getDescription();
 				 m.setRelScore(docScore);

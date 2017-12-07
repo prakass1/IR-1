@@ -17,7 +17,9 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
+import org.lir.util.HtmlParser;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.IndexableFieldType;
 
 public class Indexer {
 
@@ -50,6 +52,8 @@ public class Indexer {
 			// make a new, empty document
 			Document doc = new Document();
 			
+			HtmlParser htmlParser = new HtmlParser();
+			
 			// Add the path of the file as a field named "path". Use a
 			// field that is indexed (i.e. searchable), but don't tokenize
 			// the field into separate words and don't index term frequency
@@ -71,8 +75,22 @@ public class Indexer {
 			// Note that FileReader expects the file to be in UTF-8 encoding.
 			// If that's not the case searching for special characters will fail.\
 			
-			doc.add(new TextField("contents",
-					new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));
+			
+			org.jsoup.nodes.Document document = htmlParser.parseDoc(file.toString());
+			
+			String body = document.body().text();
+			String title = document.title();
+			//System.out.println("Title" + title);
+			//Adding body
+			Field bodyField = new TextField("contents", body, Field.Store.NO);
+			doc.add(bodyField);
+			
+			//Adding Title
+			Field titleField = new StringField("title", title, Field.Store.YES);
+			doc.add(titleField);
+			
+			/*doc.add(new TextField("contents",
+					new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));*/
 
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can be there):
