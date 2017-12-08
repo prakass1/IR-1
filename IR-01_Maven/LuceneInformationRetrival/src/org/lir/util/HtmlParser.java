@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jsoup.Jsoup;
@@ -24,10 +25,11 @@ public class HtmlParser {
 		File fileToWrite = new File("output.html");
         PrintWriter pw = new PrintWriter(fileToWrite);
 		String html= "<html><head><title>Output Result</title></head><body>";
-		html+="<table border='1'><tr><th>RANK</th><th>PATH</th><th>TITLE</th><th>RELSCORE</th></tr>";
+		html+="<table border='1'><tr><th>RANK</th><th>PATH</th><th>TITLE</th><th>RELSCORE</th><th>SUMMARY</th></tr>";
 		for(Model m:model) {
 			
-			html+="<tr><td>" + m.getRank() + "</td><td>" + m.getPath() + "</td><td>" + m.getTitle() + "</td><td>" + m.getRelScore() + "</td></tr>";
+			
+			html+="<tr><td>" + m.getRank() + "</td><td>" + m.getPath() + "</td><td>" + m.getTitle() + "</td><td>" + m.getRelScore()+ "</td><td>" + m.getSummary().replaceAll("[^a-zA-Z0-9 ]", "")+"</td></tr>";
 		}
 		
 		html+="</table></body></html>";
