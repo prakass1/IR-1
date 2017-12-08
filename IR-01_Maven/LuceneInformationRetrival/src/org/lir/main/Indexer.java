@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongPoint;
@@ -17,6 +19,8 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.lir.util.HtmlParser;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableFieldType;
@@ -28,13 +32,13 @@ public class Indexer {
 	 * recurses over files and directories found under the given directory.
 	 *
 	 */
-	public void indexDocs(final IndexWriter writer, Path path) throws IOException {
+	public void indexDocs(final IndexWriter writer, Path path,String query) throws IOException {
 		if (Files.isDirectory(path)) {
 			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 					try {
-						indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
+						indexDoc(writer, file, attrs.lastModifiedTime().toMillis(),query);
 					} catch (IOException ignore) {
 						// don't index files that can't be read.
 					}
@@ -42,12 +46,12 @@ public class Indexer {
 				}
 			});
 		} else {
-			indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
+			indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis(), query);
 		}
 	}
 
 	/** Indexes a single document */
-	public void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException {
+	public void indexDoc(IndexWriter writer, Path file, long lastModified,String query) throws IOException {
 		try (InputStream stream = Files.newInputStream(file)) {
 			// make a new, empty document
 			Document doc = new Document();
@@ -80,6 +84,28 @@ public class Indexer {
 			
 			String body = document.body().text();
 			String title = document.title();
+			Element ele=document.body();
+			boolean flag= body.contains(query);
+			if (flag) {
+				
+				Elements thePara  =ele.select("p");
+				thePara.select("sup").remove();
+				
+				for(int i=0;i<thePara.size();i++) {
+					if(thePara.get(i).text().contains(query))
+					{
+						System.out.println("Matched::: " + thePara.get(i).text());
+						//System.out.println(p);
+						if(thePara.get(i)!=null) {
+						Field summaryField = new TextField("summary", thePara.get(i).text(), Field.Store.YES);
+						doc.add(summaryField);
+						}
+						
+					}
+				}				 
+			}
+				
+			
 			//System.out.println("Title" + title);
 			//Adding body
 			Field bodyField = new TextField("contents", body, Field.Store.NO);
@@ -89,6 +115,7 @@ public class Indexer {
 			Field titleField = new StringField("title", title, Field.Store.YES);
 			doc.add(titleField);
 			
+			//Field summary = new StringField("summary", summary, Field.Store.YES);
 			/*doc.add(new TextField("contents",
 					new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));*/
 

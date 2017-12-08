@@ -30,7 +30,7 @@ import org.lir.util.HtmlParser;
 
 public class IndexSearch {
 
-	String[] field = {"title","contents"};
+	String[] field = {"title","contents","summary"};
 	String queryString = null; // this will come from the cmd parameter
 	int repeat = 0;
 	private static String VS = "VS";
@@ -82,13 +82,13 @@ public class IndexSearch {
 
 			List<Model> m = doSearch(in, searcher, query, hitsPerPage);
 
-			System.out.println("|| RANK || PATH || Score || Title");
+			System.out.println("|| RANK || PATH || Score || Title ||Summary");
 			for (Model model : m) {
 				// For each model obtain use the path to parse the html file and
 				// Search the title and summary (Here: Summary should relevant to the query) and
 				// print it out
 				// All implementation for parsing should go into utility package
-				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||");
+				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||" + model.getSummary());
 			}
 			
 			HtmlParser p = new HtmlParser();
@@ -146,16 +146,18 @@ public class IndexSearch {
 			String path = doc.get("path");
 			if (path != null) {
 				//System.out.println((i + 1) + ". " + path);
-				System.out.println(doc.get("title"));
+				//System.out.println(doc.get("title"));
+				//System.out.println(doc.get("summary"));
 				m.setRank(i + 1);
 				m.setPath(path);
+				m.setSummary(doc.get("summary"));
 				m.setTitle(doc.get("title"));
 				//Explanation explain = searcher.explain(query, i + 1);
 				 //String desc = explain.getDescription();
 				 m.setRelScore(docScore);
 				//System.out.println("Desc " + desc);
-				System.out.println("Score " + docScore);
-				System.out.println("Explanations:: " + searcher.explain(query, i + 1));
+				//System.out.println("Score " + docScore);
+				//System.out.println("Explanations:: " + searcher.explain(query, i + 1));
 				/*//String title = doc.get("title");
 				if (title != null) {
 					System.out.println("   Title: " + doc.get("title"));

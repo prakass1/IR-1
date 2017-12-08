@@ -67,7 +67,7 @@ public class SearchMain {
 				+ " [path to document folder] [path to index folder] [VS/OK] [query]");
 	}
 
-	static void intializationAndIndex(boolean create, String indexPath, Path docDir) {
+	static void intializationAndIndex(boolean create, String indexPath, Path docDir,String query) {
 		Date start = new Date();
 		try {
 			System.out.println("Indexing to directory '" + indexPath + "'...");
@@ -95,7 +95,7 @@ public class SearchMain {
 
 			IndexWriter writer = new IndexWriter(dir, iwc);
 			Indexer indexer = new Indexer();
-			indexer.indexDocs(writer, docDir);
+			indexer.indexDocs(writer, docDir,query);
 
 			// NOTE: if you want to maximize search performance,
 			// you can optionally call forceMerge here. This can be
@@ -157,7 +157,7 @@ public class SearchMain {
 			/*
 			 * Intialize the index and perform lucene indexing
 			 */
-			intializationAndIndex(create, indexFolder, docDir);
+			intializationAndIndex(create, indexFolder, docDir,query);
 
 			IndexSearch search = new IndexSearch(query);
 
