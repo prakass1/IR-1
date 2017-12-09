@@ -128,7 +128,11 @@ public class SearchMain {
 			usage();
 		} else if (args[0] == null || args[1] == null || args[2] == null || args[3] == null) {
 			usage();
-		} else {
+		} else if (!(args[2].equals("OK")||args[2].equals("VS"))) {
+			usage();
+		}
+			
+		else {
 			// Actual execution of the code
 
 			String docFolder = args[0];
