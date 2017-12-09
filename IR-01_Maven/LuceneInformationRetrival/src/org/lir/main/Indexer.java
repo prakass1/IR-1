@@ -86,25 +86,27 @@ public class Indexer {
 			String title = document.title();
 			Element ele=document.body();
 			boolean flag= body.contains(query);
+			StringBuilder ss = new StringBuilder();
 			if (flag) {
 				
 				Elements thePara  =ele.select("p");
 				thePara.select("sup").remove();
-				
+			
 				for(int i=0;i<thePara.size();i++) {
 					if(thePara.get(i).text().contains(query))
 					{
+						ss.append(thePara.get(i).text());
 						System.out.println("Matched::: " + thePara.get(i).text());
 						//System.out.println(p);
-						if(thePara.get(i)!=null) {
-						Field summaryField = new TextField("summary", thePara.get(i).text(), Field.Store.YES);
-						doc.add(summaryField);
-						}
-						
 					}
-				}				 
+				}
 			}
-				
+		
+			//System.out.println("Summary::" + ss.toString());
+			if(ss.toString()!=null) {
+				Field summaryField = new TextField("summary", ss.toString(), Field.Store.YES);
+				doc.add(summaryField);
+			}
 			
 			//System.out.println("Title" + title);
 			//Adding body

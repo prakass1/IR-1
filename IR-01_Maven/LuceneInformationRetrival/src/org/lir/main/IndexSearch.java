@@ -30,7 +30,7 @@ import org.lir.util.HtmlParser;
 
 public class IndexSearch {
 
-	String[] field = {"title","contents","summary"};
+	String[] field = {"title","contents"};
 	String queryString = null; // this will come from the cmd parameter
 	int repeat = 0;
 	private static String VS = "VS";
