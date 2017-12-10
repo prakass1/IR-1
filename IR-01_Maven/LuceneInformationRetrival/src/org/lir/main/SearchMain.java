@@ -53,10 +53,10 @@ java -jar IR P01.jar [path to document folder] [path to index folder] [VS/OK] [q
 /*
  * 
  * 
- * Team Members: 
- * SUBASH PRAKASH
- * NIKHIL
- * ANSTUP
+ * Team Members:
+ * SUBASH PRAKASH (220408)
+ * NIKHIL MANDYA PARASHIVAMURTHY (220641)
+ * ANSTUP DAS(220571)
  * 
  * Description: Perform a simple indexing and searching strategy using apache Lucene
  * 
