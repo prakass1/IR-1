@@ -23,24 +23,25 @@ public class HtmlParser {
 	
 	
 	public void makeHTML(List<Model> model) throws FileNotFoundException {
-		File fileToWrite = new File("output.html");
-        PrintWriter pw = new PrintWriter(fileToWrite);
 		String html= "<html><head><title>Output Result</title></head><body>";
 		html+="<table border='1'><tr><th>RANK</th><th>PATH</th><th>TITLE</th><th>RELSCORE</th><th>SUMMARY</th></tr>";
+		PrintWriter pw = null;
 		for(Model m:model) {
 			
-		if(!m.getSummary().isEmpty())
+		if(m.getSummary()!=null)
 		{
-				
-			
+			File fileToWrite = new File("output.html");
+	        pw = new PrintWriter(fileToWrite);
 			html+="<tr><td>" + m.getRank() + "</td><td>" + m.getPath() + "</td><td>" + m.getTitle() + "</td><td>" + m.getRelScore()+ "</td><td>" + m.getSummary().replaceAll("[^a-zA-Z0-9 ]", "")+"</td></tr>";
 		}
 		}
 		
 		html+="</table></body></html>";
-		
+		if(pw!=null) {
 		pw.write(html);
 		pw.close();
+		}
+		
 	}
 	
 }

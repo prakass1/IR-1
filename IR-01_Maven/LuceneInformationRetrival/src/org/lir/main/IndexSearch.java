@@ -82,9 +82,15 @@ public class IndexSearch {
 
 			List<Model> m = doSearch(in, searcher, query, hitsPerPage);
 
-			System.out.println("|| RANK || PATH || Score || Title ||Summary");
 			for (Model model : m) {
-				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||" + model.getSummary());
+				System.out.println("-----------------------------------------------------------------------------------------------------------");
+				System.out.println("Result obtained are:");
+				System.out.println("Rank: " + model.getRank());
+				System.out.println("PATH: " + model.getPath());
+				System.out.println("Relevant Score: " + model.getRelScore());
+				System.out.println("Title: " + model.getTitle());
+				System.out.println("Summary: " + model.getSummary());
+				System.out.println("----------------------------------------------------------------------------------------------------------");
 			}
 			
 			HtmlParser p = new HtmlParser();
