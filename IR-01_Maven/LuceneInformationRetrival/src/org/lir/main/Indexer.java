@@ -4,14 +4,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.lucene.analysis.CharArraySet;
+import org.apache.lucene.analysis.StopFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.Tokenizer;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongPoint;
@@ -19,13 +33,17 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.util.Version;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.lir.util.HtmlParser;
+import org.tartarus.snowball.ext.PorterStemmer;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.index.IndexableFieldType;
 
 public class Indexer {
+	
+	
 
 	/**
 	 * Indexes the given file using the given writer, or if a directory is given,
@@ -77,26 +95,42 @@ public class Indexer {
 			// Add the contents of the file to a field named "contents". Specify a Reader,
 			// so that the text of the file is tokenized and indexed, but not stored.
 			// Note that FileReader expects the file to be in UTF-8 encoding.
-			// If that's not the case searching for special characters will fail.\
-			
-			
+			// If that's not the case searching for special characters will fail.	
 			org.jsoup.nodes.Document document = htmlParser.parseDoc(file.toString());
-			
+		
 			String body = document.body().text();
+			//Removing the stop words from text
+			String newBody = removeStopWords(body);
 			String title = document.title();
 			Element ele=document.body();
-			boolean flag= body.contains(query);
+			String newQuery=query.replaceAll("[^a-zA-Z0-9 ]", "");
+			//System.out.println(newQuery);
+			//System.out.println(query);
+			boolean flag= newBody.contains(newQuery);
 			StringBuilder ss = new StringBuilder();
 			if (flag) {
 				
 				Elements thePara  =ele.select("p");
 				thePara.select("sup").remove();
-			
+				
 				for(int i=0;i<thePara.size();i++) {
-					if(thePara.get(i).text().contains(query))
+					if(query.contains("*")) {
+						
+						Pattern p = Pattern.compile(query);
+						String match = findMatches(p,thePara.get(i).text());
+					if(match!=null) {
+					if(thePara.get(i).text().contains(match))
 					{
 						ss.append(thePara.get(i).text());
-						System.out.println("Matched::: " + thePara.get(i).text());
+						//System.out.println("WildCard Matched::: " + thePara.get(i).text());
+						//System.out.println(p);
+					}
+					}
+					}
+					if(thePara.get(i).text().contains(newQuery))
+					{
+						ss.append(thePara.get(i).text());
+						//System.out.println("Matched::: " + thePara.get(i).text());
 						//System.out.println(p);
 					}
 				}
@@ -110,7 +144,7 @@ public class Indexer {
 			
 			//System.out.println("Title" + title);
 			//Adding body
-			Field bodyField = new TextField("contents", body, Field.Store.NO);
+			Field bodyField = new TextField("contents", body, Field.Store.YES);
 			doc.add(bodyField);
 			
 			//Adding Title
@@ -134,4 +168,47 @@ public class Indexer {
 			}
 		}
 	}
+
+	private String findMatches(Pattern p, String text) {
+		// TODO Auto-generated method stub
+		Matcher m = p.matcher(text);
+
+	     if (m.find()) {
+	       return m.group();
+	     }
+
+		return null;
+	}
+	
+	//Porter Stemmer implementation using Snowball Library
+	public static  String applyPorterStemmer(String input) throws IOException {
+
+        PorterStemmer stemmer = new PorterStemmer();
+        stemmer.setCurrent(input);
+        stemmer.stem();
+        return stemmer.getCurrent();
+    }
+	
+	//This is where we have implemented the method to allow removal of stopWords.We are currently using this method during the indexing process
+	public static String removeStopWords(String body){
+		//Default Set of stop words are being used
+        CharArraySet stopWords = EnglishAnalyzer.getDefaultStopSet();
+        TokenStream tokenStream = new StandardAnalyzer().tokenStream(null, new StringReader(body));
+        tokenStream = new StopFilter(tokenStream, stopWords);
+        StringBuilder sb = new StringBuilder();
+        CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+        try {
+        tokenStream.reset();
+        while (tokenStream.incrementToken()) {
+            String term = charTermAttribute.toString();
+            sb.append(term + " ");
+        }
+        tokenStream.close();
+        }
+        catch(IOException e) {
+        	e.printStackTrace();
+        }
+        
+        return sb.toString();
+    }
 }
