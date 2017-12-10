@@ -49,6 +49,7 @@ java -jar IR P01.jar [path to document folder] [path to index folder] [VS/OK] [q
 ########################################################################################
 */
 
+
 /*
  * 
  * 
@@ -126,7 +127,7 @@ public class SearchMain {
 
 		if (args.length == 0) {
 			usage();
-		} else if (args[0] == null || args[1] == null || args[2] == null || args[3] == null) {
+		} else if (args.length != 4) {
 			usage();
 		} else if (!(args[2].equals("OK")||args[2].equals("VS"))) {
 			usage();

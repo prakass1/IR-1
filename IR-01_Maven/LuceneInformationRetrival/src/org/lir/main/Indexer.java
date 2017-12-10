@@ -98,14 +98,13 @@ public class Indexer {
 			// If that's not the case searching for special characters will fail.	
 			org.jsoup.nodes.Document document = htmlParser.parseDoc(file.toString());
 		
-			String body = document.body().text();
+			String body = document.body().text().toLowerCase();
 			//Removing the stop words from text
 			String newBody = removeStopWords(body);
 			String title = document.title();
 			Element ele=document.body();
-			String newQuery=query.replaceAll("[^a-zA-Z0-9 ]", "");
-			//System.out.println(newQuery);
-			//System.out.println(query);
+			String lowerCasedQuery = query.toLowerCase();
+			String newQuery=lowerCasedQuery.replaceAll("[^a-zA-Z0-9 ]", "");
 			boolean flag= body.contains(newQuery);
 			StringBuilder ss = new StringBuilder();
 			if (flag) {
@@ -116,33 +115,27 @@ public class Indexer {
 				for(int i=0;i<thePara.size();i++) {
 					if(query.contains("*")) {
 						
-						Pattern p = Pattern.compile(query);
+						Pattern p = Pattern.compile(lowerCasedQuery);
 						String match = findMatches(p,thePara.get(i).text());
 					if(match!=null) {
-					if(thePara.get(i).text().contains(match))
+					if(thePara.get(i).text().toLowerCase().contains(match))
 					{
 						ss.append(thePara.get(i).text());
-						//System.out.println("WildCard Matched::: " + thePara.get(i).text());
-						//System.out.println(p);
 					}
 					}
 					}
-					if(thePara.get(i).text().contains(newQuery))
+					if(thePara.get(i).text().toLowerCase().contains(newQuery))
 					{
 						ss.append(thePara.get(i).text());
-						//System.out.println("Matched::: " + thePara.get(i).text());
-						//System.out.println(p);
 					}
 				}
 			}
-		
-			//System.out.println("Summary::" + ss.toString());
+
 			if(ss.toString()!=null) {
 				Field summaryField = new TextField("summary", ss.toString(), Field.Store.YES);
 				doc.add(summaryField);
 			}
 			
-			//System.out.println("Title" + title);
 			//Adding body
 			Field bodyField = new TextField("contents", newBody, Field.Store.NO);
 			doc.add(bodyField);
@@ -151,9 +144,6 @@ public class Indexer {
 			Field titleField = new StringField("title", title, Field.Store.YES);
 			doc.add(titleField);
 			
-			//Field summary = new StringField("summary", summary, Field.Store.YES);
-			/*doc.add(new TextField("contents",
-					new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))));*/
 
 			if (writer.getConfig().getOpenMode() == OpenMode.CREATE) {
 				// New index, so we just add the document (no old document can be there):
