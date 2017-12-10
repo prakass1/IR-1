@@ -88,7 +88,10 @@ public class IndexSearch {
 				// Search the title and summary (Here: Summary should relevant to the query) and
 				// print it out
 				// All implementation for parsing should go into utility package
-				System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||" + model.getSummary());
+				if(!model.getSummary().isEmpty()) {
+					
+					System.out.println("|| " + model.getRank() + " ||" + model.getPath() + " || " + model.getRelScore() + " || " + model.getTitle() + "||" + model.getSummary());
+				}
 			}
 			
 			HtmlParser p = new HtmlParser();

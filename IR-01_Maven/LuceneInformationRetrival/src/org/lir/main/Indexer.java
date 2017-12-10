@@ -106,7 +106,7 @@ public class Indexer {
 			String newQuery=query.replaceAll("[^a-zA-Z0-9 ]", "");
 			//System.out.println(newQuery);
 			//System.out.println(query);
-			boolean flag= newBody.contains(newQuery);
+			boolean flag= body.contains(newQuery);
 			StringBuilder ss = new StringBuilder();
 			if (flag) {
 				
@@ -144,7 +144,7 @@ public class Indexer {
 			
 			//System.out.println("Title" + title);
 			//Adding body
-			Field bodyField = new TextField("contents", body, Field.Store.YES);
+			Field bodyField = new TextField("contents", newBody, Field.Store.NO);
 			doc.add(bodyField);
 			
 			//Adding Title
